@@ -1,26 +1,30 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import Login from './pages/login/Login';
+import Register from './pages/register/Register';
+
+import Navbar from './components/navbar/Navbar';
+import Landing from './pages/landing/Landing';
+import ProtectedRoute from './components/protected-route/ProtectedRoute';
+import ReverseProtectedRoute from './components/reverse-protected-route/ReverseProtectedRoute';
+import Profile from './pages/profile/Profile';
+import ProfileSettings from './pages/profile/ProfileSettings';
+
+class App extends React.Component {
+  render = () => (
+    <Router>
+      <Navbar/>
+      <Switch>
+        <ProtectedRoute path="/" component={Landing} exact/>
+        <Route path="/users/:id" component={Profile} />
+        <ProtectedRoute path="/profile/settings" component={ProfileSettings} />
+        <ReverseProtectedRoute path="/login" component={Login} />
+        <ReverseProtectedRoute path="/register" component={Register}/>
+        <Route path="*" component={() => <h1>Not found</h1>}/>
+      </Switch>
+    </Router>
+  )
 }
 
 export default App;

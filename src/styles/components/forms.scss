@@ -1,0 +1,44 @@
+.auth-form {
+    border: 1px solid #E8E8E8;
+    margin: 150px auto;
+}
+
+.auth-form__form-title {
+    margin: 30px auto;
+}
+
+.auth-form-submit {
+    margin: 100px auto;
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+    .auth-form {
+        width: 100%;
+        padding: 50px;
+    }
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {
+    .auth-form {
+        width: 100%;
+        padding: 50px;
+    }
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
+    .login-form {
+        width: 80%;
+        padding: 50px;
+    }
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+    .auth-form {
+        width: 60%;
+        padding: 50px;
+    }
+}

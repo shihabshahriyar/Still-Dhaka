@@ -1,0 +1,18 @@
+@import './components/forms.scss';
+@import './components/profiles.scss';
+
+.refresh-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.display-photo-settings {
+    margin: 0 auto 2.5rem auto; 
+    width: 500px;
+    background-position: bottom;
+    background-size: cover;
+    height: 500px;
+    clip-path: circle(50% at 50% 50%);
+}
