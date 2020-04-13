@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Form, Button, Input } from 'semantic-ui-react';
+import { Container, Form, Button, Input, Message } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { startRegisterUser } from '../../store/actions/auth';
@@ -12,14 +12,41 @@ class Register extends React.Component {
         username: '',
         gender: 'male',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        registrationError: '',
+        isRegistering: false
     }
     onRegisterSubmit = () => {
-        this.props.startRegisterUser(this.state);
+        this.setState({ isRegistering: true });
+        this.props.startRegisterUser({
+            email: this.state.email,
+            firstName: this.state.firstName,
+            lastName: this.state.lastName,
+            username: this.state.username,
+            gender: this.state.gender,
+            password: this.state.password,
+            confirmPassword: this.state.confirmPassword
+        })
+        .then(() => {
+            this.setState({ isRegistering: false });
+            this.props.history.push('/')
+        })
+        .catch((error) => {
+            this.setState({
+                registrationError: error.message,
+                isRegistering: false
+            });
+        });
     }
     render = () => (
         <Container>
             <div className="auth-form">
+                { this.state.registrationError && (
+                    <Message negative>
+                        <Message.Header>There has been a problem.</Message.Header>
+                        <p>{this.state.registrationError}</p>
+                    </Message>
+                )}
                 <h1 className="auth-form__form-title">Register form</h1>
                 <Form onSubmit={this.onRegisterSubmit}>
                     <Form.Field>
@@ -62,7 +89,7 @@ class Register extends React.Component {
                     <label>Confirmation password</label>
                     <input placeholder='Enter confirmation password' type="password" value={this.state.confirmPassword} onChange={(e) => this.setState({confirmPassword: e.target.value})} />
                     </Form.Field>
-                    <Button className="auth-form-submit" color="green" type='submit'>Register</Button>
+                    <Button className="auth-form-submit" color="green" type='submit' disabled={this.state.isRegistering} loading={this.state.isRegistering}>Register</Button>
                     <Link style={{ display: 'block', marginTop: 15 }} to="/login">Already user? Sign in.</Link>
                 </Form>
             </div>

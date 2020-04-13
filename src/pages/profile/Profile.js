@@ -7,7 +7,8 @@ import { db } from '../../config/firebaseConfig';
 class Profile extends React.Component {
     state = {
         user: null,
-        isAuthenticatedUser: false
+        isAuthenticatedUser: false,
+        id: ''
     }
     componentDidMount = () => {
         const id = this.props.match.params.id;
@@ -16,13 +17,13 @@ class Profile extends React.Component {
         //If not, search user in database
         if (id == this.props.auth.id) {
             console.log('This is your profile');
-            this.setState({ user: this.props.auth.user, isAuthenticatedUser: true });
+            this.setState({ user: this.props.auth.user, isAuthenticatedUser: true, id });
         } else {
             db.collection('users').doc(id).get()
                 .then((doc) => {
                     if (doc.exists) {
                         let user = doc.data();
-                        this.setState({ user, isAuthenticatedUser: false });
+                        this.setState({ user, isAuthenticatedUser: false, id });
                     } else {
                         console.log('No user');
                         this.props.history.push('/404');
@@ -33,6 +34,32 @@ class Profile extends React.Component {
                     this.props.history.push('/404');
                 });
         }
+    }
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (nextProps.match.params.id !== prevState.id) {
+            const id = nextProps.match.params.id;
+            if (id == nextProps.auth.id) {
+                console.log('This is your profile');
+                return { user: nextProps.auth.user, isAuthenticatedUser: true, id };
+            } else {
+                db.collection('users').doc(id).get()
+                    .then((doc) => {
+                        if (doc.exists) {
+                            let user = doc.data();
+                            return{ user, isAuthenticatedUser: false, id };
+                        } else {
+                            console.log('No user');
+                            nextProps.history.push('/404');
+                            return null;
+                        }
+                    })
+                    .catch((error) => {
+                        nextProps.history.push('/404');
+                        return null;
+                    });
+            }
+        }
+        return null;
     }
     renderProfile = () => {
         return (
@@ -45,7 +72,7 @@ class Profile extends React.Component {
 
                         <div class="profile-user-settings">
                             <h1 class="profile-user-name text">{this.state.user.username}</h1>
-                            {this.state.isAuthenticatedUser && <Link to="/profile/settings" class="profile-edit-btn"><Button icon><Icon name='settings'/> Edit Profile</Button></Link>}
+                            {this.state.isAuthenticatedUser && <Link to="/profile/settings" class="profile-edit-btn"><Button icon><Icon name='settings' /> Edit Profile</Button></Link>}
                             {!this.state.isAuthenticatedUser && <span class="profile-edit-btn"><Button icon color="blue"><Icon name='plus' /> Follow</Button></span>}
                         </div>
 
@@ -67,21 +94,21 @@ class Profile extends React.Component {
         )
     }
     renderGallery = () => {
-        if(this.state.user.photos.length > 0) {
+        if (this.state.user.photos.length > 0) {
             return (
-                <h1 style={{textAlign: 'center'}}>photos</h1>
+                <h1 style={{ textAlign: 'center' }}>photos</h1>
             )
         } else {
             if (this.state.isAuthenticatedUser) {
                 return (
-                    <div style={{textAlign: 'center'}}>
+                    <div style={{ textAlign: 'center' }}>
                         <h1>You have no photos to show.</h1>
-                        <Button color="green">Upload</Button>
+                        <Link to='/upload'><Button color="green">Upload</Button></Link>
                     </div>
                 )
             } else {
                 return (
-                    <h1 style={{textAlign: 'center'}}>This user has no photos to show.</h1>
+                    <h1 style={{ textAlign: 'center' }}>This user has no photos to show.</h1>
                 )
             }
         }
