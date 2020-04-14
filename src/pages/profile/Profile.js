@@ -1,29 +1,53 @@
 import React from 'react';
-import { Container, Button, Image, Icon } from 'semantic-ui-react';
+import { Container, Button, Image, Icon, Modal, Header } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { db } from '../../config/firebaseConfig';
+import Masonry from 'react-masonry-css';
+import Photo from '../../components/photo/Photo';
+import FollowButton from '../../components/buttons/FollowButton';
+
 
 class Profile extends React.Component {
     state = {
         user: null,
         isAuthenticatedUser: false,
-        id: ''
+        id: '',
+        photos: []
     }
     componentDidMount = () => {
         const id = this.props.match.params.id;
-        //Check if id matches user id in store
-        //If it does, set user object to auth user
-        //If not, search user in database
         if (id == this.props.auth.id) {
-            console.log('This is your profile');
-            this.setState({ user: this.props.auth.user, isAuthenticatedUser: true, id });
+            let user = this.props.auth.user;
+            let photosToFetch = user.photos;
+            let photoPromises = photosToFetch.map((id) => {
+                return db.collection('photos').doc(id).get();
+            });
+            Promise.all(photoPromises)
+                .then((docs) => {
+                    let photos = docs.map((photo) => photo.data());
+                    this.setState({ user, isAuthenticatedUser: true, id, photos });
+                })
+                .catch((error) => {
+                    console.log(error)
+                });
         } else {
             db.collection('users').doc(id).get()
                 .then((doc) => {
                     if (doc.exists) {
                         let user = doc.data();
-                        this.setState({ user, isAuthenticatedUser: false, id });
+                        let photosToFetch = user.photos;
+                        let photoPromises = photosToFetch.map((id) => {
+                            return db.collection('photos').doc(id).get();
+                        });
+                        Promise.all(photoPromises)
+                            .then((docs) => {
+                                let photos = docs.map((photo) => photo.data());
+                                this.setState({ user, isAuthenticatedUser: false, id, photos });
+                            })
+                            .catch((error) => {
+                                console.log(error)
+                            });
                     } else {
                         console.log('No user');
                         this.props.history.push('/404');
@@ -35,58 +59,104 @@ class Profile extends React.Component {
                 });
         }
     }
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.match.params.id !== prevState.id) {
-            const id = nextProps.match.params.id;
-            if (id == nextProps.auth.id) {
-                console.log('This is your profile');
-                return { user: nextProps.auth.user, isAuthenticatedUser: true, id };
+    // static getDerivedStateFromProps(nextProps, prevState) {
+    //     if (nextProps.match.params.id !== prevState.id) {
+    //         const id = nextProps.match.params.id;
+    //         if (id == nextProps.auth.id) {
+    //             console.log('This is your profile');
+    //             return { user: nextProps.auth.user, isAuthenticatedUser: true, id };
+    //         } else {
+    //             db.collection('users').doc(id).get()
+    //                 .then((doc) => {
+    //                     if (doc.exists) {
+    //                         let user = doc.data();
+    //                         return { user, isAuthenticatedUser: false, id };
+    //                     } else {
+    //                         console.log('No user');
+    //                         nextProps.history.push('/404');
+    //                         return null;
+    //                     }
+    //                 })
+    //                 .catch((error) => {
+    //                     nextProps.history.push('/404');
+    //                     return null;
+    //                 });
+    //         }
+    //     }
+    //     return null;
+    // }
+    componentDidUpdate = (prevProps, prevState) => {
+        const id = this.props.match.params.id;
+        if (prevProps.match.params.id !== id) {
+            if (id == this.props.auth.id) {
+                console.log(id);
+                let user = this.props.auth.user;
+                let photosToFetch = user.photos;
+                let photoPromises = photosToFetch.map((id) => {
+                    return db.collection('photos').doc(id).get();
+                });
+                Promise.all(photoPromises)
+                    .then((docs) => {
+                        let photos = docs.map((photo) => photo.data());
+                        this.setState({ photos, user, isAuthenticatedUser: true, id });
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    });
             } else {
                 db.collection('users').doc(id).get()
                     .then((doc) => {
                         if (doc.exists) {
                             let user = doc.data();
-                            return{ user, isAuthenticatedUser: false, id };
+                            let photosToFetch = user.photos;
+                            let photoPromises = photosToFetch.map((id) => {
+                                return db.collection('photos').doc(id).get();
+                            });
+                            Promise.all(photoPromises)
+                            .then((docs) => {
+                                let photos = docs.map((photo) => photo.data());
+                                this.setState({ photos, user, isAuthenticatedUser: false, id });
+                            })
+                            .catch((error) => {
+                                console.log(error)
+                            });
                         } else {
                             console.log('No user');
-                            nextProps.history.push('/404');
-                            return null;
+                            prevProps.history.push('/404');
                         }
                     })
                     .catch((error) => {
-                        nextProps.history.push('/404');
-                        return null;
+                        prevProps.history.push('/404');
                     });
             }
         }
-        return null;
     }
     renderProfile = () => {
         return (
             <section>
                 <Container>
-                    <div class="profile">
-                        <div class="profile-image">
+                    <div className="profile">
+                        <div className="profile-image">
                             <Image src={this.state.user.photoUrl} alt="" size="small" />
                         </div>
 
-                        <div class="profile-user-settings">
-                            <h1 class="profile-user-name text">{this.state.user.username}</h1>
-                            {this.state.isAuthenticatedUser && <Link to="/profile/settings" class="profile-edit-btn"><Button icon><Icon name='settings' /> Edit Profile</Button></Link>}
-                            {!this.state.isAuthenticatedUser && <span class="profile-edit-btn"><Button icon color="blue"><Icon name='plus' /> Follow</Button></span>}
+                        <div className="profile-user-settings">
+                            <h1 className="profile-user-name text">{this.state.user.username}</h1>
+                            {this.state.isAuthenticatedUser && <Link to="/profile/settings" className="profile-edit-btn"><Button icon><Icon name='settings' /> Edit Profile</Button></Link>}
+                            <FollowButton user={this.state.user}/>
                         </div>
 
-                        <div class="profile-stats">
+                        <div className="profile-stats">
                             <div className="profile-stats-list">
-                                <li><span class="profile-stat-count">{this.state.user.photos.length}</span> posts</li>
-                                <li><span class="profile-stat-count">{this.state.user.followers.length}</span> followers</li>
-                                <li><span class="profile-stat-count">{this.state.user.following.length}</span> following</li>
+                                <li><span className="profile-stat-count">{this.state.user.photos.length}</span> posts</li>
+                                <li><span className="profile-stat-count">{this.state.user.followers.length}</span> followers</li>
+                                <li><span className="profile-stat-count">{this.state.user.following.length}</span> following</li>
                             </div>
                         </div>
 
-                        <div class="profile-bio">
-                            <span class="profile-real-name">{`${this.state.user.firstName} ${this.state.user.lastName}`}</span>
-                            <span class="profile-bio-text">{`${this.state.user.bio}`}</span>
+                        <div className="profile-bio">
+                            <span className="profile-real-name">{`${this.state.user.firstName} ${this.state.user.lastName}`}</span>
+                            <span className="profile-bio-text">{`${this.state.user.bio}`}</span>
                         </div>
                     </div>
                 </Container>
@@ -96,7 +166,18 @@ class Profile extends React.Component {
     renderGallery = () => {
         if (this.state.user.photos.length > 0) {
             return (
-                <h1 style={{ textAlign: 'center' }}>photos</h1>
+                <Masonry
+                    breakpointCols={3}
+                    className="my-masonry-grid"
+                    columnClassName="my-masonry-grid_column">
+                    {
+                        this.state.photos.map((photo, index) => {
+                            return (
+                                <Photo photo={photo} key={index} />
+                            )
+                        })
+                    }
+                </Masonry>
             )
         } else {
             if (this.state.isAuthenticatedUser) {
@@ -117,7 +198,7 @@ class Profile extends React.Component {
         <div>
             {this.state.user && this.renderProfile()}
             <Container>
-                {this.state.user && this.renderGallery()}
+                {this.state.user && !!this.state.photos && this.renderGallery()}
             </Container>
         </div>
     )

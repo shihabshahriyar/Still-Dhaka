@@ -15,6 +15,7 @@ class Navbar extends React.Component {
     }
     renderAuthenticatedDropdowns = () => (
         <div>
+            <Dropdown.Item><Link to={`/upload`}>Upload</Link></Dropdown.Item>
             <Dropdown.Item><Link to={`/users/${this.props.auth.id}`}>Profile</Link></Dropdown.Item>
             <Dropdown.Item onClick={this.onLogout}><Link>Logout</Link></Dropdown.Item>
         </div>

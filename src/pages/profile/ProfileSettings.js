@@ -83,12 +83,28 @@ class ProfileSettings extends React.Component {
     }
 
     getCroppedImg(image, crop, fileName) {
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
         const scaleX = image.naturalWidth / image.width;
         const scaleY = image.naturalHeight / image.height;
-        canvas.width = crop.width;
-        canvas.height = crop.height;
-        const ctx = canvas.getContext('2d');
+        let originWidth = crop.width * scaleX;
+        let originHeight = crop.height * scaleY;
+        // maximum width/height
+        let maxWidth = 1200, maxHeight = 1200 / (16 / 9);
+        let targetWidth = originWidth;
+        let targetHeight = originHeight;
+        if (originWidth > maxWidth || originHeight > maxHeight) {
+            if (originWidth / originHeight > maxWidth / maxHeight) {
+                targetWidth = maxWidth;
+                targetHeight = Math.round(maxWidth * (originHeight / originWidth));
+            } else {
+                targetHeight = maxHeight;
+                targetWidth = Math.round(maxHeight * (originWidth / originHeight));
+            }
+        }
+        // set canvas size
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext("2d");
 
         ctx.drawImage(
             image,
@@ -98,21 +114,23 @@ class ProfileSettings extends React.Component {
             crop.height * scaleY,
             0,
             0,
-            crop.width,
-            crop.height
+            targetWidth,
+            targetHeight
         );
 
         return new Promise((resolve, reject) => {
-            canvas.toBlob(blob => {
-                if (!blob) {
-                    console.error('Canvas is empty');
-                    return;
-                }
-                blob.name = fileName;
-                window.URL.revokeObjectURL(this.fileUrl);
-                // this.fileUrl = window.URL.createObjectURL(blob);
-                resolve(blob);
-            }, 'image/jpeg');
+            canvas.toBlob(
+                blob => {
+                    if (!blob) {
+                        console.error("Canvas is empty");
+                        return;
+                    }
+                    blob.name = fileName;
+                    resolve(blob);
+                },
+                "image/png",
+                1
+            );
         });
     }
     onCrop = () => {

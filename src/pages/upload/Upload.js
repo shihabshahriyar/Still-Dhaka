@@ -192,6 +192,7 @@ class Upload extends React.Component {
                             placeholder='Enter the name of this photo.'
                             value={this.state.title}
                             onChange={(e) => this.setState({ title: e.target.value })}
+                            required
                         />
                         <Form.Field
                             control={Input}
@@ -199,6 +200,7 @@ class Upload extends React.Component {
                             placeholder='Describe the photo.'
                             value={this.state.description}
                             onChange={(e) => this.setState({ description: e.target.value })}
+                            required
                         />
                         <Form.Field
                             control={Input}
@@ -213,6 +215,7 @@ class Upload extends React.Component {
                             placeholder='Where was this snap taken?.'
                             value={this.state.location}
                             onChange={(e) => this.setState({ location: e.target.value })}
+                            required
                         />
                         <Button className="auth-form-submit" color="green" type='submit' disabled={!this.state.croppedImage || this.state.isUploading} loading={this.state.isUploading}>Post</Button>
                         {/* <Link to={`/users/${this.props.auth.id}`}>Go back</Link> */}

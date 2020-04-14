@@ -45,7 +45,7 @@ class Login extends React.Component {
                     <label>Password</label>
                     <input placeholder='Enter your password' type="password" value={this.state.password} onChange={(e) => this.setState({password: e.target.value})} />
                     </Form.Field>
-                    <Button className="auth-form-submit" color="green" type='submit' disabled={this.state.isLoggingIn} loading={this.state.isLoggingIn}>Login</Button>
+                    <Button className="auth-form-submit" color="blue" type='submit' disabled={this.state.isLoggingIn} loading={this.state.isLoggingIn}>Login</Button>
                     <Link style={{ display: 'block', marginTop: 15 }} to="/register">New user? Join us.</Link>
                 </Form>
             </div>

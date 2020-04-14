@@ -30,11 +30,31 @@ export const uploadPhoto = (payload) => ({
     payload
 });
 
+export const startFollowUser = (userId) => {
+    return (dispatch, getState) => {
+        return new Promise((resolve, reject) => {
+            let authUserId = getState().auth.id;
+            db.collection('users').doc(userId).update({
+                followers: firebase.firestore.FieldValue.arrayUnion(authUserId)
+            })
+            .then(() => {
+                db.collection('users').doc(authUserId).update({
+                    following: firebase.firestore.FieldValue.arrayUnion(userId)
+                })
+                .then(() => {
+                    
+                })
+            })
+        })
+    }
+}
+
+//Can only upload photo if user is authenticated
 export const startUploadPhoto = (photoDetails) => {
     return (dispatch, getState) => {
         return new Promise((resolve, reject) => {
             const { title, description, tags, photo, location }  = photoDetails;
-            db.collection('photos').add({ title, description, tags, location, createdBy: getState().auth.id })
+            db.collection('photos').add({ title, description, tags, location, createdBy: getState().auth.id, downloads: 0, likes: [] })
                 .then((doc) => {
                     const photoId = doc.id;
                         db.collection('users').doc(getState().auth.id).update({
@@ -49,8 +69,10 @@ export const startUploadPhoto = (photoDetails) => {
                                     storage.ref(`photos/${getState().auth.id}/${photoId}`).getDownloadURL()
                                         .then((url) => {
                                             db.collection('photos').doc(photoId).update({
-                                                url
-                                            }).then(() => {
+                                                url,
+                                                id: photoId
+                                            })
+                                            .then(() => {
                                                 db.collection('users').doc(getState().auth.id).get()
                                                 .then((user) => {
                                                     dispatch(uploadPhoto({
@@ -90,6 +112,7 @@ export const startLoginUser = (credentials) => {
                 .then(({ user }) => {
                     db.collection('users').doc(user.uid).get()
                         .then((doc) => {
+                            //Saved user also has an id property
                             let savedUser = doc.data();
                             dispatch(loginUser({
                                 id: user.uid,
@@ -129,7 +152,7 @@ export const startRegisterUser = (credentials) => {
                 }
                 auth.createUserWithEmailAndPassword(email, password)
                     .then(({ user }) => {
-                        db.collection('users').doc(user.uid).set(newUser)
+                        db.collection('users').doc(user.uid).set({...newUser, id: user.uid})
                             .then(() => {
                                 dispatch(registerUser({
                                     id: user.uid,
@@ -224,7 +247,7 @@ export const startUpdateUser = (updates) => {
                                 db.collection('users').doc(getState().auth.id).update({
                                     firstName, lastName, gender, bio, photoUrl: url
                                 })
-                                    .then(() => {
+                                .then(() => {
                                         db.collection('users').doc(getState().auth.id).get()
                                             .then((doc) => {
                                                 const updatedUser = doc.data();
