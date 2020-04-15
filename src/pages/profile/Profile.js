@@ -1,21 +1,23 @@
 import React from 'react';
-import { Container, Button, Image, Icon, Modal, Header } from 'semantic-ui-react';
+import { Container, Button, Image, Icon } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { db } from '../../config/firebaseConfig';
 import Masonry from 'react-masonry-css';
 import Photo from '../../components/photo/Photo';
 import FollowButton from '../../components/buttons/FollowButton';
-
+import { BarLoader } from 'react-spinners';
 
 class Profile extends React.Component {
     state = {
         user: null,
         isAuthenticatedUser: false,
         id: '',
-        photos: []
+        photos: [],
+        isLoading: false
     }
     componentDidMount = () => {
+        this.setState({ isLoading: true });
         const id = this.props.match.params.id;
         if (id == this.props.auth.id) {
             let user = this.props.auth.user;
@@ -26,10 +28,11 @@ class Profile extends React.Component {
             Promise.all(photoPromises)
                 .then((docs) => {
                     let photos = docs.map((photo) => photo.data());
-                    this.setState({ user, isAuthenticatedUser: true, id, photos });
+                    this.setState({ user, isAuthenticatedUser: true, id, photos, isLoading: false });
                 })
                 .catch((error) => {
                     console.log(error)
+                    this.setState({ isLoading: false });
                 });
         } else {
             db.collection('users').doc(id).get()
@@ -43,53 +46,30 @@ class Profile extends React.Component {
                         Promise.all(photoPromises)
                             .then((docs) => {
                                 let photos = docs.map((photo) => photo.data());
-                                this.setState({ user, isAuthenticatedUser: false, id, photos });
+                                this.setState({ user, isAuthenticatedUser: false, id, photos, isLoading: false });
                             })
                             .catch((error) => {
                                 console.log(error)
+                                this.setState({ isLoading: false });
                             });
                     } else {
                         console.log('No user');
+                        this.setState({ isLoading: false });
                         this.props.history.push('/404');
                     }
                 })
                 .catch((error) => {
                     console.log('No user');
+                    this.setState({ isLoading: false });
                     this.props.history.push('/404');
                 });
         }
     }
-    // static getDerivedStateFromProps(nextProps, prevState) {
-    //     if (nextProps.match.params.id !== prevState.id) {
-    //         const id = nextProps.match.params.id;
-    //         if (id == nextProps.auth.id) {
-    //             console.log('This is your profile');
-    //             return { user: nextProps.auth.user, isAuthenticatedUser: true, id };
-    //         } else {
-    //             db.collection('users').doc(id).get()
-    //                 .then((doc) => {
-    //                     if (doc.exists) {
-    //                         let user = doc.data();
-    //                         return { user, isAuthenticatedUser: false, id };
-    //                     } else {
-    //                         console.log('No user');
-    //                         nextProps.history.push('/404');
-    //                         return null;
-    //                     }
-    //                 })
-    //                 .catch((error) => {
-    //                     nextProps.history.push('/404');
-    //                     return null;
-    //                 });
-    //         }
-    //     }
-    //     return null;
-    // }
     componentDidUpdate = (prevProps, prevState) => {
-        const id = this.props.match.params.id;
-        if (prevProps.match.params.id !== id) {
+        if (prevProps != this.props) {
+            const id = this.props.match.params.id;
+            this.setState({ isLoading: true });
             if (id == this.props.auth.id) {
-                console.log(id);
                 let user = this.props.auth.user;
                 let photosToFetch = user.photos;
                 let photoPromises = photosToFetch.map((id) => {
@@ -98,10 +78,11 @@ class Profile extends React.Component {
                 Promise.all(photoPromises)
                     .then((docs) => {
                         let photos = docs.map((photo) => photo.data());
-                        this.setState({ photos, user, isAuthenticatedUser: true, id });
+                        this.setState({ user, isAuthenticatedUser: true, id, photos, isLoading: false });
                     })
                     .catch((error) => {
                         console.log(error)
+                        this.setState({ isLoading: false });
                     });
             } else {
                 db.collection('users').doc(id).get()
@@ -113,22 +94,32 @@ class Profile extends React.Component {
                                 return db.collection('photos').doc(id).get();
                             });
                             Promise.all(photoPromises)
-                            .then((docs) => {
-                                let photos = docs.map((photo) => photo.data());
-                                this.setState({ photos, user, isAuthenticatedUser: false, id });
-                            })
-                            .catch((error) => {
-                                console.log(error)
-                            });
+                                .then((docs) => {
+                                    let photos = docs.map((photo) => photo.data());
+                                    this.setState({ user, isAuthenticatedUser: false, id, photos, isLoading: false });
+                                })
+                                .catch((error) => {
+                                    console.log(error)
+                                });
                         } else {
                             console.log('No user');
-                            prevProps.history.push('/404');
+                            this.setState({ isLoading: false });
+                            this.props.history.push('/404');
                         }
                     })
                     .catch((error) => {
-                        prevProps.history.push('/404');
+                        console.log('No user');
+                        this.setState({ isLoading: false });
+                        this.props.history.push('/404');
                     });
             }
+        }
+    }
+    renderFollowButton = (user) => {
+        if (user.id != this.props.auth.user.id) {
+            return (
+                <FollowButton user={this.state.user} />
+            )
         }
     }
     renderProfile = () => {
@@ -143,7 +134,7 @@ class Profile extends React.Component {
                         <div className="profile-user-settings">
                             <h1 className="profile-user-name text">{this.state.user.username}</h1>
                             {this.state.isAuthenticatedUser && <Link to="/profile/settings" className="profile-edit-btn"><Button icon><Icon name='settings' /> Edit Profile</Button></Link>}
-                            <FollowButton user={this.state.user}/>
+                            <span className="profile-edit-btn">{this.renderFollowButton(this.state.user)}</span>
                         </div>
 
                         <div className="profile-stats">
@@ -194,14 +185,24 @@ class Profile extends React.Component {
             }
         }
     }
-    render = () => (
-        <div>
-            {this.state.user && this.renderProfile()}
-            <Container>
-                {this.state.user && !!this.state.photos && this.renderGallery()}
-            </Container>
-        </div>
-    )
+    render = () => {
+        if (!this.state.isLoading) {
+            return (
+                <div>
+                    {this.state.user && this.renderProfile()}
+                    <Container>
+                        {this.state.user && !!this.state.photos && this.renderGallery()}
+                    </Container>
+                </div>
+            )
+        } else {
+            return (
+                <div className="refresh-loader">
+                    <BarLoader color="#4DAF7C" />
+                </div>
+            )
+        }
+    }
 }
 
 const mapStateToProps = (state) => {

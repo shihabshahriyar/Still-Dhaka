@@ -34,11 +34,6 @@ export default (state = initialState, action) => {
                 id: action.payload.id,
                 user: action.payload.user
             }
-        case 'UPLOAD_PHOTO':
-            return {
-                ...state,
-                user: action.payload.user
-            };
         default: 
             return state;
     }

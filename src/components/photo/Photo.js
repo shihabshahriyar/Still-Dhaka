@@ -4,6 +4,7 @@ import { db } from '../../config/firebaseConfig';
 import FollowButton from '../buttons/FollowButton';
 import LikeButton from '../buttons/LikeButton';
 import DownloadButton from '../buttons/DownloadButton';
+import { connect } from 'react-redux';
 
 
 class Photo extends React.Component {
@@ -50,6 +51,13 @@ class Photo extends React.Component {
             isPhotoViewed: false,
         });
     }
+    renderFollowButton = (user) => {
+        if (user.id != this.props.auth.user.id) {
+            return (
+                <FollowButton user={this.state.user} />
+            )
+        }
+    }
     render = () => (
         <div>
             <div className="photo-container" data-identifier={this.props.photo.id} onClick={this.onImageClick}>
@@ -65,7 +73,7 @@ class Photo extends React.Component {
                             <Grid.Column floated='left'>
                             <Image src={this.state.user && this.state.user.photoUrl} avatar />
                             {this.state.user && <span style={{marginRight: 5}}>{this.state.user.firstName} {this.state.user.lastName}</span> }
-                            <FollowButton user={this.state.user} />
+                            {this.state.user && this.renderFollowButton(this.state.user)}
                             </Grid.Column>  
                             <Grid.Column floated='right' style={{textAlign: 'right'}}>
                                 <LikeButton photo={this.props.photo} />
@@ -90,4 +98,8 @@ class Photo extends React.Component {
     )
 }
 
-export default Photo;
+const mapStateToProps = (state) => ({
+    auth: state.auth
+})
+
+export default connect(mapStateToProps)(Photo);

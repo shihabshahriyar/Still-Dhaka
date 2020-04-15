@@ -34,17 +34,80 @@ export const startFollowUser = (userId) => {
     return (dispatch, getState) => {
         return new Promise((resolve, reject) => {
             let authUserId = getState().auth.id;
-            db.collection('users').doc(userId).update({
-                followers: firebase.firestore.FieldValue.arrayUnion(authUserId)
-            })
-            .then(() => {
-                db.collection('users').doc(authUserId).update({
-                    following: firebase.firestore.FieldValue.arrayUnion(userId)
+            //First check if user has already followed or not
+            let isAlreadyFollowing = getState().auth.user.following.includes(userId);
+            if(!isAlreadyFollowing) {
+                    db.collection('users').doc(userId).update({
+                    followers: firebase.firestore.FieldValue.arrayUnion(authUserId)
                 })
                 .then(() => {
-                    
+                    db.collection('users').doc(authUserId).update({
+                        following: firebase.firestore.FieldValue.arrayUnion(userId)
+                    })
+                    .then(() => {
+                        dispatch(updateUser({
+                            user: {
+                                ...getState().auth.user,
+                                following: [
+                                    ...getState().auth.user.following,
+                                    userId
+                                ]
+                            }
+                        }));
+                        resolve();
+                    })
+                    .catch((error) => {
+                        reject(error);
+                    })
                 })
-            })
+                .catch((error) => {
+                    reject(error);
+                })
+            } else {
+                const error = {
+                    message: 'User is already following'
+                }
+                reject(error);
+            }
+        })
+    }
+}
+
+export const startUnfollowUser = (userId) => {
+    return (dispatch, getState) => {
+        return new Promise((resolve, reject) => {
+            let authUserId = getState().auth.id;
+            let isAlreadyFollowing = getState().auth.user.following.includes(userId);
+            if(isAlreadyFollowing) {
+                db.collection('users').doc(userId).update({
+                    followers: firebase.firestore.FieldValue.arrayRemove(authUserId)
+                })
+                .then(() => {
+                    db.collection('users').doc(authUserId).update({
+                        following: firebase.firestore.FieldValue.arrayRemove(userId)
+                    })
+                    .then(() => {
+                        dispatch(updateUser({
+                            user: {
+                                ...getState().auth.user,
+                                following: getState().auth.user.following.filter((id) => id != userId)
+                            }
+                        }));
+                        resolve();
+                    })
+                    .catch((error) => {
+                        reject(error);
+                    })
+                })
+                .catch((error) => {
+                    reject(error);
+                })
+            } else {
+                let error = {
+                    message: "You don't follow the user"
+                }
+                reject(error);
+            }
         })
     }
 }
@@ -73,16 +136,26 @@ export const startUploadPhoto = (photoDetails) => {
                                                 id: photoId
                                             })
                                             .then(() => {
-                                                db.collection('users').doc(getState().auth.id).get()
-                                                .then((user) => {
-                                                    dispatch(uploadPhoto({
-                                                        user: user.data()
-                                                    }));
-                                                    resolve();
-                                                })
-                                                .catch((error) => {
-                                                    reject(error);
-                                                });
+                                                // db.collection('users').doc(getState().auth.id).get()
+                                                // .then((user) => {
+                                                //     dispatch(uploadPhoto({
+                                                //         user: user.data()
+                                                //     }));
+                                                //     resolve();
+                                                // })
+                                                // .catch((error) => {
+                                                //     reject(error);
+                                                // });
+                                                dispatch(updateUser({
+                                                    user: {
+                                                        ...getState().auth.user,
+                                                        photos: [
+                                                            ...getState().auth.user.photos,
+                                                            photoId
+                                                        ]
+                                                    }
+                                                }));
+                                                resolve();
                                             })
                                             .catch((error) => {
                                                 reject(error);
@@ -221,17 +294,27 @@ export const startUpdateUser = (updates) => {
                     firstName, lastName, gender, bio
                 })
                     .then(() => {
-                        db.collection('users').doc(getState().auth.id).get()
-                            .then((doc) => {
-                                const updatedUser = doc.data();
-                                console.log(updatedUser);
-                                dispatch(updateUser({
-                                    user: updatedUser
-                                }));
-                                resolve();
-                            }).catch((error) => {
-                                reject(error);
-                            })
+                        // db.collection('users').doc(getState().auth.id).get()
+                        //     .then((doc) => {
+                        //         const updatedUser = doc.data();
+                        //         console.log(updatedUser);
+                        //         dispatch(updateUser({
+                        //             user: updatedUser
+                        //         }));
+                        //         resolve();
+                        //     }).catch((error) => {
+                        //         reject(error);
+                        //     })
+                        dispatch(updateUser({
+                            user: {
+                                ...getState().auth.user,
+                                firstName,
+                                lastName,
+                                gender,
+                                bio
+                            }
+                        }));
+                        resolve();
                     })
                     .catch((error) => {
                         reject(error);
@@ -248,16 +331,27 @@ export const startUpdateUser = (updates) => {
                                     firstName, lastName, gender, bio, photoUrl: url
                                 })
                                 .then(() => {
-                                        db.collection('users').doc(getState().auth.id).get()
-                                            .then((doc) => {
-                                                const updatedUser = doc.data();
-                                                dispatch(updateUser({
-                                                    user: updatedUser
-                                                }));
-                                                resolve();
-                                            }).catch((error) => {
-                                                reject(error);
-                                            })
+                                        // db.collection('users').doc(getState().auth.id).get()
+                                        //     .then((doc) => {
+                                        //         const updatedUser = doc.data();
+                                        //         dispatch(updateUser({
+                                        //             user: updatedUser
+                                        //         }));
+                                        //         resolve();
+                                        //     }).catch((error) => {
+                                        //         reject(error);
+                                        //     })
+                                        dispatch(updateUser({
+                                            user: {
+                                                ...getState().auth.user,
+                                                firstName,
+                                                lastName,
+                                                gender,
+                                                bio,
+                                                photoUrl: url
+                                            }
+                                        }));
+                                        resolve();
                                     })
                                     .catch((error) => {
                                         reject(error);
