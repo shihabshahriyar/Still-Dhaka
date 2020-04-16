@@ -178,7 +178,7 @@ class ProfileSettings extends React.Component {
                 <h1 className="auth-form__form-title">Edit profile</h1>
                 <input id="myInput" type="file" style={{ visibility: 'hidden' }} id="fileUpload" onChange={this.onPhotoChange} accept="image/*" />
                 <Image src={this.state.photoUrl} circular size="small" className="display-photo-settings" onClick={this.onPhotoUpload} />
-                <Button style={{ margin: 'auto', display: 'block', marginBottom: '2rem' }} onClick={this.onPhotoUpload}>Change photo</Button>
+                <Button basic style={{ margin: 'auto', display: 'block', marginBottom: '2rem' }} onClick={this.onPhotoUpload}>Change photo</Button>
                 <Form onSubmit={this.onUpdateProfile}>
                     <Form.Group widths='equal'>
                         <Form.Field
@@ -210,7 +210,7 @@ class ProfileSettings extends React.Component {
                             </select>
                         </Form.Field>
                     </Form.Field>
-                    <Button className="auth-form-submit" color="green" type='submit' disabled={this.state.isUpdating} loading={this.state.isUpdating}>Update</Button>
+                    <Button className="auth-form-submit" secondary type='submit' disabled={this.state.isUpdating} loading={this.state.isUpdating}>Update</Button>
                     <Link to={`/users/${this.props.auth.id}`}>Go back</Link>
                 </Form>
             </div>

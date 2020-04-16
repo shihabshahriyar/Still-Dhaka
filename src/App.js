@@ -20,7 +20,7 @@ class App extends React.Component {
     <Router history={history}>
       <Navbar/>
       <Switch>
-        <ProtectedRoute path="/" component={Landing} exact/>
+        <Route path="/" component={Landing} exact/>
         <Route path="/users/:id" component={Profile} />
         <ProtectedRoute path="/profile/settings" component={ProfileSettings} />
         <ProtectedRoute path="/upload" component={Upload} />

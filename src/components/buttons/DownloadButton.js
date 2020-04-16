@@ -6,7 +6,7 @@ class DownloadButton extends React.Component {
         console.log(this.props.photo);
     }
     render = () => (
-        <Button icon labelPosition='left' color="green" onClick={this.onDownload}>
+        <Button icon labelPosition='left' basic onClick={this.onDownload}>
             <Icon name='download' />
             Free download
         </Button>

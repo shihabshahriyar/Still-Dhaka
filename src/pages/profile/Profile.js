@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Button, Image, Icon } from 'semantic-ui-react';
+import { Container, Button, Image, Icon, Modal, Header } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { db } from '../../config/firebaseConfig';
@@ -7,6 +7,9 @@ import Masonry from 'react-masonry-css';
 import Photo from '../../components/photo/Photo';
 import FollowButton from '../../components/buttons/FollowButton';
 import { BarLoader } from 'react-spinners';
+import {
+  isMobile
+} from "react-device-detect";
 
 class Profile extends React.Component {
     state = {
@@ -14,7 +17,8 @@ class Profile extends React.Component {
         isAuthenticatedUser: false,
         id: '',
         photos: [],
-        isLoading: false
+        isLoading: false,
+        showLoginModal: false
     }
     componentDidMount = () => {
         this.setState({ isLoading: true });
@@ -66,9 +70,14 @@ class Profile extends React.Component {
         }
     }
     componentDidUpdate = (prevProps, prevState) => {
+        //Check if update stems from route parameter change or button click
+        // If it stems from route parameter change, only then change isloading to true
+        // Else, dont
         if (prevProps != this.props) {
             const id = this.props.match.params.id;
-            this.setState({ isLoading: true });
+            if(prevProps.match.params.id != id) {
+                this.setState({ isLoading: true });
+            }
             if (id == this.props.auth.id) {
                 let user = this.props.auth.user;
                 let photosToFetch = user.photos;
@@ -116,9 +125,18 @@ class Profile extends React.Component {
         }
     }
     renderFollowButton = (user) => {
-        if (user.id != this.props.auth.user.id) {
+        if (this.props.auth.id) {
+            if (user.id != this.props.auth.id) {
+                return (
+                    <FollowButton user={user} />
+                )
+            }
+        } else {
             return (
-                <FollowButton user={this.state.user} />
+                <Button icon basic onClick={() => this.setState({showLoginModal: true})}>
+                    <Icon name='plus' />
+                    Follow
+                </Button>
             )
         }
     }
@@ -133,8 +151,8 @@ class Profile extends React.Component {
 
                         <div className="profile-user-settings">
                             <h1 className="profile-user-name text">{this.state.user.username}</h1>
-                            {this.state.isAuthenticatedUser && <Link to="/profile/settings" className="profile-edit-btn"><Button icon><Icon name='settings' /> Edit Profile</Button></Link>}
-                            <span className="profile-edit-btn">{this.renderFollowButton(this.state.user)}</span>
+                            {this.state.isAuthenticatedUser && <Link to="/profile/settings" className="profile-edit-btn"><Button basic icon><Icon name='settings'/> Edit Profile</Button></Link>}
+                            <span className="profile-edit-btn">{this.state.user && this.renderFollowButton(this.state.user)}</span>
                         </div>
 
                         <div className="profile-stats">
@@ -158,7 +176,7 @@ class Profile extends React.Component {
         if (this.state.user.photos.length > 0) {
             return (
                 <Masonry
-                    breakpointCols={3}
+                    breakpointCols={isMobile == true ? 1 : 3}
                     className="my-masonry-grid"
                     columnClassName="my-masonry-grid_column">
                     {
@@ -175,7 +193,7 @@ class Profile extends React.Component {
                 return (
                     <div style={{ textAlign: 'center' }}>
                         <h1>You have no photos to show.</h1>
-                        <Link to='/upload'><Button color="green">Upload</Button></Link>
+                        <Link to='/upload'><Button basic>Upload</Button></Link>
                     </div>
                 )
             } else {
@@ -192,6 +210,28 @@ class Profile extends React.Component {
                     {this.state.user && this.renderProfile()}
                     <Container>
                         {this.state.user && !!this.state.photos && this.renderGallery()}
+                        <Modal
+                            open={this.state.showLoginModal}
+                            onClose={() => this.setState({showLoginModal: false})}
+                            basic
+                            size='small'
+                            centered
+                        >
+                            <Header icon='browser' content='Hello there' />
+                            <Modal.Content>
+                                <h3>This action requires you to be logged in.</h3>
+                            </Modal.Content>
+                            <Modal.Actions>
+                                <Button color='red' onClick={() => this.setState({showLoginModal: false})} inverted>
+                                    <Icon name='remove' /> Cancel
+                                 </Button>
+                                 <Link to="/login">
+                                    <Button color='green' inverted>
+                                        <Icon name='checkmark' /> Login
+                                    </Button>                   
+                                </Link>
+                            </Modal.Actions>
+                        </Modal>
                     </Container>
                 </div>
             )

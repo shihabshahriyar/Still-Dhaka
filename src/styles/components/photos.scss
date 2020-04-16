@@ -1,0 +1,60 @@
+
+.my-masonry-grid {
+    display: -webkit-box; /* Not needed if autoprefixing */
+    display: -ms-flexbox; /* Not needed if autoprefixing */
+    display: flex;
+    margin-left: -30px; /* gutter size offset */
+    width: auto;
+  }
+  .my-masonry-grid_column {
+    padding-left: 30px; /* gutter size */
+    background-clip: padding-box;
+  }
+  
+  /* Style your items */
+  .my-masonry-grid_column > div { /* change div to reference your elements you put in <Masonry> */
+    background: grey;
+    margin-bottom: 30px;
+  }
+  
+  .photo-container {
+    position: relative;
+  }
+  
+  .photo {
+    opacity: 1;
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: .5s ease;
+    backface-visibility: hidden;
+  }
+  
+  .photo-content {
+    transition: .5s ease;
+    opacity: 0;
+    position: absolute;
+    color: white;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  
+  .photo-container:hover .photo {
+    opacity: 0.3;
+  }
+  
+  .photo-container:hover .photo-content {
+    opacity: 1;
+  }
+  
+
+.view-image-modal {
+    padding: 2rem;
+}
+
+.view-image-modal-content {
+    margin-top: 25px;
+}

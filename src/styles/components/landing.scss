@@ -1,0 +1,40 @@
+.hero-banner {
+    height: 60vh;
+    position: relative;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.61), rgba(0, 0, 0, 0)), url(https://images.unsplash.com/photo-1554629942-0c17bf68b884?ixlib=rb-1.2.1&auto=format&fit=crop&w=1867&q=80);
+    background-size: cover;
+    background-position: center;
+}
+
+.hero-text {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.hero-text-header {
+    font-size: 3rem;
+}
+
+.hero-content {
+    text-align: center;
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.hero-input {
+    margin: auto;
+    width: 40vw;
+}
+
+@media (max-width: 1024px) {
+    .hero-text-header {
+        font-size: 1.3rem;
+    }
+    .hero-input {
+        width: 70vw;
+    }
+}

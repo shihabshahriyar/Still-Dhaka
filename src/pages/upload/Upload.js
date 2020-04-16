@@ -179,13 +179,10 @@ class Upload extends React.Component {
                         </Message>
                     )}
                     <h1 className="auth-form__form-title">Upload photo</h1>
-                    {/* <input id="myInput" type="file" style={{ visibility: 'hidden' }} id="fileUpload" onChange={this.onPhotoChange} accept="image/*" /> */}
-                    {/* <Image src={this.state.photoUrl} circular size="small" className="display-photo-settings" onClick={this.onPhotoUpload} /> */}
-                    {/* <Button style={{ margin: 'auto', display: 'block', marginBottom: '2rem' }} onClick={this.onPhotoUpload}>Change photo</Button> */}
                     <Form onSubmit={this.onUploadPost}>
                         <Image src={this.state.photoUrl} fluid />
                         <input id="myInput" type="file" style={{ visibility: 'hidden' }} id="fileUpload" onChange={this.onPhotoChange} accept="image/*" />
-                        <Button style={{ margin: 'auto', display: 'block', marginBottom: '2rem' }} onClick={this.onPhotoUpload} type="button">Upload photo</Button>
+                        <Button style={{ margin: 'auto', display: 'block', marginBottom: '2rem' }} basic onClick={this.onPhotoUpload} type="button">Upload photo</Button>
                         <Form.Field
                             control={Input}
                             label='Title'
@@ -217,8 +214,8 @@ class Upload extends React.Component {
                             onChange={(e) => this.setState({ location: e.target.value })}
                             required
                         />
-                        <Button className="auth-form-submit" color="green" type='submit' disabled={!this.state.croppedImage || this.state.isUploading} loading={this.state.isUploading}>Post</Button>
-                        {/* <Link to={`/users/${this.props.auth.id}`}>Go back</Link> */}
+                        <Button className="auth-form-submit" secondary type='submit' disabled={!this.state.croppedImage || this.state.isUploading} loading={this.state.isUploading}>Post</Button>
+                        <Link to={`/users/${this.props.auth.id}`}>Go back</Link>
                     </Form>
                 </div>
 

@@ -19,11 +19,11 @@ class Register extends React.Component {
     onRegisterSubmit = () => {
         this.setState({ isRegistering: true });
         this.props.startRegisterUser({
-            email: this.state.email,
-            firstName: this.state.firstName,
-            lastName: this.state.lastName,
-            username: this.state.username,
-            gender: this.state.gender,
+            email: this.state.email.trim(),
+            firstName: this.state.firstName.trim(),
+            lastName: this.state.lastName.trim(),
+            username: this.state.username.trim(),
+            gender: this.state.gender.trim(),
             password: this.state.password,
             confirmPassword: this.state.confirmPassword
         })
@@ -89,7 +89,7 @@ class Register extends React.Component {
                     <label>Confirmation password</label>
                     <input placeholder='Enter confirmation password' type="password" value={this.state.confirmPassword} onChange={(e) => this.setState({confirmPassword: e.target.value})} />
                     </Form.Field>
-                    <Button className="auth-form-submit" color="green" type='submit' disabled={this.state.isRegistering} loading={this.state.isRegistering}>Register</Button>
+                    <Button className="auth-form-submit" secondary type='submit' disabled={this.state.isRegistering} loading={this.state.isRegistering}>Register</Button>
                     <Link style={{ display: 'block', marginTop: 15 }} to="/login">Already user? Sign in.</Link>
                 </Form>
             </div>

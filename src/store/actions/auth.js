@@ -30,46 +30,123 @@ export const uploadPhoto = (payload) => ({
     payload
 });
 
+export const startUnlikePhoto = (photoId) => {
+    return (dispatch, getState) => {
+        return new Promise((resolve, reject) => {
+            let authUserId = getState().auth.id;
+            let isAlreadyLiked = getState().auth.user.likes.includes(photoId);
+            if (isAlreadyLiked) {
+                db.collection('photos').doc(photoId).update({
+                    likes: firebase.firestore.FieldValue.arrayRemove(authUserId)
+                })
+                    .then(() => {
+                        db.collection('users').doc(authUserId).update({
+                            likes: firebase.firestore.FieldValue.arrayRemove(photoId)
+                        })
+                            .then(() => {
+                                dispatch(updateUser({
+                                    user: {
+                                        ...getState().auth.user,
+                                        likes: getState().auth.user.likes.filter((id) => id != photoId)
+                                    }
+                                }));
+                                resolve();
+                            })
+                            .catch((error) => {
+                                reject(error);
+                            });
+                    })
+                    .catch((error) => {
+                        reject(error);
+                    });
+            } else {
+                let error = { message: 'User has already unliked' }
+                reject(error);
+            }
+        });
+    }
+}
+
+export const startLikePhoto = (photoId) => {
+    return (dispatch, getState) => {
+        return new Promise((resolve, reject) => {
+            let authUserId = getState().auth.id;
+            let isAlreadyLiked = getState().auth.user.likes.includes(photoId);
+            if (!isAlreadyLiked) {
+                db.collection('photos').doc(photoId).update({
+                    likes: firebase.firestore.FieldValue.arrayUnion(authUserId)
+                })
+                    .then(() => {
+                        db.collection('users').doc(authUserId).update({
+                            likes: firebase.firestore.FieldValue.arrayUnion(photoId)
+                        })
+                            .then(() => {
+                                dispatch(updateUser({
+                                    user: {
+                                        ...getState().auth.user,
+                                        likes: [
+                                            ...getState().auth.user.likes,
+                                            photoId
+                                        ]
+                                    }
+                                }));
+                                resolve();
+                            })
+                            .catch((error) => {
+                                reject(error);
+                            });
+                    })
+                    .catch((error) => {
+                        reject(error);
+                    });
+            } else {
+                let error = { message: 'User has already liked' }
+                reject(error);
+            }
+        });
+    }
+}
+
 export const startFollowUser = (userId) => {
     return (dispatch, getState) => {
         return new Promise((resolve, reject) => {
             let authUserId = getState().auth.id;
             //First check if user has already followed or not
             let isAlreadyFollowing = getState().auth.user.following.includes(userId);
-            if(!isAlreadyFollowing) {
-                    db.collection('users').doc(userId).update({
+            if (!isAlreadyFollowing) {
+                db.collection('users').doc(userId).update({
                     followers: firebase.firestore.FieldValue.arrayUnion(authUserId)
                 })
-                .then(() => {
-                    db.collection('users').doc(authUserId).update({
-                        following: firebase.firestore.FieldValue.arrayUnion(userId)
-                    })
                     .then(() => {
-                        dispatch(updateUser({
-                            user: {
-                                ...getState().auth.user,
-                                following: [
-                                    ...getState().auth.user.following,
-                                    userId
-                                ]
-                            }
-                        }));
-                        resolve();
+                        db.collection('users').doc(authUserId).update({
+                            following: firebase.firestore.FieldValue.arrayUnion(userId)
+                        })
+                            .then(() => {
+                                dispatch(updateUser({
+                                    user: {
+                                        ...getState().auth.user,
+                                        following: [
+                                            ...getState().auth.user.following,
+                                            userId
+                                        ]
+                                    }
+                                }));
+                                resolve();
+                            })
+                            .catch((error) => {
+                                reject(error);
+                            })
                     })
                     .catch((error) => {
                         reject(error);
                     })
-                })
-                .catch((error) => {
-                    reject(error);
-                })
             } else {
                 const error = {
                     message: 'User is already following'
                 }
                 reject(error);
             }
-        })
+        });
     }
 }
 
@@ -78,33 +155,33 @@ export const startUnfollowUser = (userId) => {
         return new Promise((resolve, reject) => {
             let authUserId = getState().auth.id;
             let isAlreadyFollowing = getState().auth.user.following.includes(userId);
-            if(isAlreadyFollowing) {
+            if (isAlreadyFollowing) {
                 db.collection('users').doc(userId).update({
                     followers: firebase.firestore.FieldValue.arrayRemove(authUserId)
                 })
-                .then(() => {
-                    db.collection('users').doc(authUserId).update({
-                        following: firebase.firestore.FieldValue.arrayRemove(userId)
-                    })
                     .then(() => {
-                        dispatch(updateUser({
-                            user: {
-                                ...getState().auth.user,
-                                following: getState().auth.user.following.filter((id) => id != userId)
-                            }
-                        }));
-                        resolve();
+                        db.collection('users').doc(authUserId).update({
+                            following: firebase.firestore.FieldValue.arrayRemove(userId)
+                        })
+                            .then(() => {
+                                dispatch(updateUser({
+                                    user: {
+                                        ...getState().auth.user,
+                                        following: getState().auth.user.following.filter((id) => id != userId)
+                                    }
+                                }));
+                                resolve();
+                            })
+                            .catch((error) => {
+                                reject(error);
+                            })
                     })
                     .catch((error) => {
                         reject(error);
                     })
-                })
-                .catch((error) => {
-                    reject(error);
-                })
             } else {
                 let error = {
-                    message: "You don't follow the user"
+                    message: "User already does not follow the user"
                 }
                 reject(error);
             }
@@ -116,13 +193,13 @@ export const startUnfollowUser = (userId) => {
 export const startUploadPhoto = (photoDetails) => {
     return (dispatch, getState) => {
         return new Promise((resolve, reject) => {
-            const { title, description, tags, photo, location }  = photoDetails;
+            const { title, description, tags, photo, location } = photoDetails;
             db.collection('photos').add({ title, description, tags, location, createdBy: getState().auth.id, downloads: 0, likes: [] })
                 .then((doc) => {
                     const photoId = doc.id;
-                        db.collection('users').doc(getState().auth.id).update({
-                            photos: firebase.firestore.FieldValue.arrayUnion(photoId)
-                        })
+                    db.collection('users').doc(getState().auth.id).update({
+                        photos: firebase.firestore.FieldValue.arrayUnion(photoId)
+                    })
                         .then(() => {
                             const uploadTask = storage.ref(`photos/${getState().auth.id}/${photoId}`).put(photo);
                             uploadTask.on('state_changed',
@@ -135,44 +212,32 @@ export const startUploadPhoto = (photoDetails) => {
                                                 url,
                                                 id: photoId
                                             })
-                                            .then(() => {
-                                                // db.collection('users').doc(getState().auth.id).get()
-                                                // .then((user) => {
-                                                //     dispatch(uploadPhoto({
-                                                //         user: user.data()
-                                                //     }));
-                                                //     resolve();
-                                                // })
-                                                // .catch((error) => {
-                                                //     reject(error);
-                                                // });
-                                                dispatch(updateUser({
-                                                    user: {
-                                                        ...getState().auth.user,
-                                                        photos: [
-                                                            ...getState().auth.user.photos,
-                                                            photoId
-                                                        ]
-                                                    }
-                                                }));
-                                                resolve();
-                                            })
-                                            .catch((error) => {
-                                                reject(error);
-                                            });
+                                                .then(() => {
+                                                    dispatch(updateUser({
+                                                        user: {
+                                                            ...getState().auth.user,
+                                                            photos: [
+                                                                ...getState().auth.user.photos,
+                                                                photoId
+                                                            ]
+                                                        }
+                                                    }));
+                                                    resolve();
+                                                })
+                                                .catch((error) => {
+                                                    reject(error);
+                                                });
                                         });
                                 });
-                            })
-                            .catch((error) => {
-                                reject(error);
-                            });
-                    
+                        })
+                        .catch((error) => {
+                            reject(error);
+                        });
+
                 })
                 .catch((error) => {
                     reject(error);
                 });
-            // const uploadTask = storage.ref(`photos/${getState().auth.id}/`).put(photo);
-            //After creating entry in photo database, and updating the user, dispatch new user obj to reducer
         });
     }
 }
@@ -223,21 +288,34 @@ export const startRegisterUser = (credentials) => {
                     likes: [],
                     bio: `Download free, beautiful high-quality photos curated by ${firstName} ${lastName}`
                 }
-                auth.createUserWithEmailAndPassword(email, password)
-                    .then(({ user }) => {
-                        db.collection('users').doc(user.uid).set({...newUser, id: user.uid})
-                            .then(() => {
-                                dispatch(registerUser({
-                                    id: user.uid,
-                                    user: newUser
-                                }));
-                                resolve();
-                            }).catch((error) => {
-                                reject(error);
+                db.collection('users').where('username', '==', newUser.username).get()
+                    .then((snapshot) => {
+                        if (snapshot.docs.length > 0) {
+                            const error = {
+                                message: 'Your username has already been taken, please try something else.'
+                            }
+                            reject(error);
+                        } else {
+                            auth.createUserWithEmailAndPassword(email, password)
+                                .then(({ user }) => {
+                                    db.collection('users').doc(user.uid).set({ ...newUser, id: user.uid })
+                                        .then(() => {
+                                            dispatch(registerUser({
+                                                id: user.uid,
+                                                user: {
+                                                    ...newUser,
+                                                    id: user.uid
+                                                }
+                                            }));
+                                            resolve();
+                                        }).catch((error) => {
+                                            reject(error);
+                                        })
+                                })
+                                .catch((error) => {
+                                    reject(error);
                             })
-                    })
-                    .catch((error) => {
-                        reject(error);
+                        }
                     })
             } else {
                 const error = {
@@ -294,17 +372,6 @@ export const startUpdateUser = (updates) => {
                     firstName, lastName, gender, bio
                 })
                     .then(() => {
-                        // db.collection('users').doc(getState().auth.id).get()
-                        //     .then((doc) => {
-                        //         const updatedUser = doc.data();
-                        //         console.log(updatedUser);
-                        //         dispatch(updateUser({
-                        //             user: updatedUser
-                        //         }));
-                        //         resolve();
-                        //     }).catch((error) => {
-                        //         reject(error);
-                        //     })
                         dispatch(updateUser({
                             user: {
                                 ...getState().auth.user,
@@ -330,17 +397,7 @@ export const startUpdateUser = (updates) => {
                                 db.collection('users').doc(getState().auth.id).update({
                                     firstName, lastName, gender, bio, photoUrl: url
                                 })
-                                .then(() => {
-                                        // db.collection('users').doc(getState().auth.id).get()
-                                        //     .then((doc) => {
-                                        //         const updatedUser = doc.data();
-                                        //         dispatch(updateUser({
-                                        //             user: updatedUser
-                                        //         }));
-                                        //         resolve();
-                                        //     }).catch((error) => {
-                                        //         reject(error);
-                                        //     })
+                                    .then(() => {
                                         dispatch(updateUser({
                                             user: {
                                                 ...getState().auth.user,
