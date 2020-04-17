@@ -22,7 +22,6 @@ class App extends React.Component {
     <Router history={history}>
       <Navbar/>
       <Switch>
-        <Route path="/" component={Landing} exact/>
         <Route path="/users/:id" component={Profile} />
         <ProtectedRoute path="/photos/edit" component={EditPhoto} />
         <ProtectedRoute path="/profile/settings" component={ProfileSettings} />
@@ -30,6 +29,7 @@ class App extends React.Component {
         <ReverseProtectedRoute path="/login" component={Login} />
         <ReverseProtectedRoute path="/register" component={Register}/>
         <Route path="/photos/:searchTerm" component={PhotoSearch} />
+        <Route path="/" component={Landing}/>
         <Route path="*" component={() => <h1>Not found</h1>}/>
       </Switch>
     </Router>

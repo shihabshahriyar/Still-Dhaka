@@ -6,6 +6,8 @@ import LikeButton from '../buttons/LikeButton';
 import DownloadButton from '../buttons/DownloadButton';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { history } from '../../App';
+import { MobileView, BrowserView } from 'react-device-detect';
 
 
 class Photo extends React.Component {
@@ -18,16 +20,14 @@ class Photo extends React.Component {
         if (this.props.photo.createdBy == this.props.auth.id) {
             return (
                 <Modal.Actions>
-                    <Link to={{
+                    <Button secondary onClick={() => history.push({
                         pathname: '/photos/edit',
                         state: {
                             photo: this.props.photo
                         }
-                    }}>
-                        <Button secondary>
-                            Edit photo <Icon name='right chevron' />
-                        </Button>
-                    </Link>
+                    })}>
+                        Edit photo <Icon name='right chevron' />
+                    </Button>
                 </Modal.Actions>
             )
         }
@@ -110,37 +110,56 @@ class Photo extends React.Component {
         <div>
             <div className="photo-container" data-identifier={this.props.photo.id} onClick={this.onImageClick}>
                 <Image src={this.props.photo.url} style={{ margin: '30px auto' }} fluid className="photo" />
-                <div class="photo-content">
+                <div className="photo-content">
                     <Button>View photo</Button>
                 </div>
             </div>
             <Modal open={this.state.isPhotoViewed} onClose={this.onPhotoViewClose}>
                 <Modal.Header>
-                    <Grid>
-                        <Grid.Row columns={2}>
-                            <Grid.Column floated='left'>
-                                {this.state.user && <Link to={`/users/${this.state.user.id}`}><Image src={this.state.user.photoUrl} avatar />
-                                    <span style={{ marginRight: 5 }}>{this.state.user.firstName} {this.state.user.lastName}</span></Link>}
+                    <BrowserView>
+                        <Grid>
+                            <Grid.Row columns={2}>
+                                <Grid.Column floated='left'>
+                                    {this.state.user && <Link to={`/users/${this.state.user.id}`}><Image src={this.state.user.photoUrl} avatar />
+                                        <span style={{ marginRight: 5 }}>{this.state.user.firstName} {this.state.user.lastName}</span></Link>}
+                                    {this.state.user && this.renderFollowButton(this.state.user)}
+                                </Grid.Column>
+                                <Grid.Column floated='right' style={{ textAlign: 'right' }}>
+                                    {this.renderLikeButton(this.props.photo)}
+                                    <DownloadButton photo={this.props.photo} />
+                                </Grid.Column>
+                            </Grid.Row>
+                        </Grid>
+                    </BrowserView>
+                    <MobileView>
+                        {this.state.user && <Link to={`/users/${this.state.user.id}`}><Image src={this.state.user.photoUrl} avatar />
+                            <span style={{ marginRight: 5 }}>{this.state.user.firstName} {this.state.user.lastName}</span></Link>}
+                        <div style={{ margin: 'auto', textAlign: 'center' }}>
+                            <div>
                                 {this.state.user && this.renderFollowButton(this.state.user)}
-                            </Grid.Column>
-                            <Grid.Column floated='right' style={{ textAlign: 'right' }}>
+                            </div>
+                            <br />
+                            <div>
                                 {this.renderLikeButton(this.props.photo)}
+                            </div>
+                            <br />
+                            {/* <div>
                                 <DownloadButton photo={this.props.photo} />
-                            </Grid.Column>
-                        </Grid.Row>
-                    </Grid>
+                            </div> */}
+                        </div>
+                    </MobileView>
                 </Modal.Header>
                 <ModalContent>
                     <section className="view-image-modal">
-                        <Container>
-                            <Image src={this.props.photo && this.props.photo.url} fluid />
-                            <div className="view-image-modal-content">
-                                <Header>{this.props.photo && this.props.photo.title}</Header>
-                                <p>
-                                    {this.props.photo && this.props.photo.description}
-                                </p>
-                            </div>
-                        </Container>
+                        {/* <Container> */}
+                        <Image src={this.props.photo && this.props.photo.url} fluid />
+                        <div className="view-image-modal-content">
+                            <Header>{this.props.photo && this.props.photo.title}</Header>
+                            <p>
+                                {this.props.photo && this.props.photo.description}
+                            </p>
+                        </div>
+                        {/* </Container> */}
                     </section>
                 </ModalContent>
                 {this.renderEditButton()}
@@ -148,20 +167,19 @@ class Photo extends React.Component {
             <Modal
                 open={this.state.showLoginModal}
                 onClose={() => this.setState({ showLoginModal: false })}
-                basic
-                size='small'
+                size='mini'
                 centered
             >
-                <Header icon='browser' content='Hold on there buddy' />
+                <Header icon='browser' content="We're sorry" />
                 <Modal.Content>
                     <h3>This action requires you to be logged in.</h3>
                 </Modal.Content>
                 <Modal.Actions>
-                    <Button color='red' onClick={() => this.setState({ showLoginModal: false })} inverted>
+                    <Button basic onClick={() => this.setState({ showLoginModal: false })}>
                         <Icon name='remove' /> Cancel
                     </Button>
                     <Link to="/login">
-                        <Button color='green' inverted>
+                        <Button secondary>
                             <Icon name='checkmark' /> Login
                         </Button>
                     </Link>

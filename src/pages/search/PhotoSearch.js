@@ -58,9 +58,9 @@ class PhotoSearch extends React.Component {
         })
     };
     componentDidMount = () => {
+        let imageContainer = document.getElementById('imageContainer');
         this.setState({ isLoading: true });
         document.onscroll = () => {
-            let imageContainer = document.getElementById('imageContainer');
             // Inside the "if" statement the "isExecuted" variable is negated to allow initial code execution.
             if (!this.state.maxReached) {
                 if (this.isBottom(imageContainer) && !this.state.isScrollExecuted) {

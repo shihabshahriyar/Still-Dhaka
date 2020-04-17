@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Button, Image, Icon, Modal, Header } from 'semantic-ui-react';
+import { Container, Button, Image, Icon, Modal, Header, Item } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { db } from '../../config/firebaseConfig';
@@ -8,7 +8,7 @@ import Photo from '../../components/photo/Photo';
 import FollowButton from '../../components/buttons/FollowButton';
 import { BarLoader } from 'react-spinners';
 import {
-  isMobile
+    isMobile
 } from "react-device-detect";
 
 class Profile extends React.Component {
@@ -18,7 +18,11 @@ class Profile extends React.Component {
         id: '',
         photos: [],
         isLoading: false,
-        showLoginModal: false
+        showLoginModal: false,
+        followers: [],
+        following: [],
+        openFollowersModal: false,
+        openFollowingModal: false
     }
     componentDidMount = () => {
         this.setState({ isLoading: true });
@@ -75,7 +79,7 @@ class Profile extends React.Component {
         // Else, dont
         if (prevProps != this.props) {
             const id = this.props.match.params.id;
-            if(prevProps.match.params.id != id) {
+            if (prevProps.match.params.id != id) {
                 this.setState({ isLoading: true });
             }
             if (id == this.props.auth.id) {
@@ -133,11 +137,50 @@ class Profile extends React.Component {
             }
         } else {
             return (
-                <Button icon basic onClick={() => this.setState({showLoginModal: true})}>
+                <Button icon basic onClick={() => this.setState({ showLoginModal: true })}>
                     <Icon name='plus' />
                     Follow
                 </Button>
             )
+        }
+    }
+    onFollowersOpen = () => {
+        if (this.state.user.followers.length > 0) {
+            db.collection('users')
+                .where('following', 'array-contains', this.state.user.id)
+                .orderBy('id')
+                .get()
+                .then((snapshot) => {
+                    let followers = snapshot.docs.map((doc) => doc.data());
+                    this.setState({
+                        openFollowersModal: true,
+                        followers
+                    })
+                })
+        } else {
+            this.setState({
+                openFollowersModal: true
+            });
+        }
+    }
+    onFollowingOpen = () => {
+        if (this.state.user.following.length > 0) {
+            db.collection('users')
+                .where('followers', 'array-contains', this.state.user.id)
+                .orderBy('id')
+                .get()
+                .then((snapshot) => {
+                    console.log(snapshot);
+                    let following = snapshot.docs.map((doc) => doc.data());
+                    this.setState({
+                        openFollowingModal: true,
+                        following
+                    })
+                })
+        } else {
+            this.setState({
+                openFollowersModal: true
+            });
         }
     }
     renderProfile = () => {
@@ -151,15 +194,15 @@ class Profile extends React.Component {
 
                         <div className="profile-user-settings">
                             <h1 className="profile-user-name text">{this.state.user.username}</h1>
-                            {this.state.isAuthenticatedUser && <Link to="/profile/settings" className="profile-edit-btn"><Button basic icon><Icon name='settings'/> Edit Profile</Button></Link>}
+                            {this.state.isAuthenticatedUser && <Link to="/profile/settings" className="profile-edit-btn"><Button basic icon><Icon name='settings' /> Edit Profile</Button></Link>}
                             <span className="profile-edit-btn">{this.state.user && this.renderFollowButton(this.state.user)}</span>
                         </div>
 
                         <div className="profile-stats">
                             <div className="profile-stats-list">
                                 <li><span className="profile-stat-count">{this.state.user.photos.length}</span> posts</li>
-                                <li><span className="profile-stat-count">{this.state.user.followers.length}</span> followers</li>
-                                <li><span className="profile-stat-count">{this.state.user.following.length}</span> following</li>
+                                <li onClick={this.onFollowersOpen}><span className="profile-stat-count">{this.state.user.followers.length}</span> followers</li>
+                                <li onClick={this.onFollowingOpen}><span className="profile-stat-count">{this.state.user.following.length}</span> following</li>
                             </div>
                         </div>
 
@@ -203,6 +246,18 @@ class Profile extends React.Component {
             }
         }
     }
+    onFollowingClose = () => {
+        this.setState({
+            openFollowingModal: false,
+            following: []
+        })
+    }
+    onFollowersClose = () => {
+        this.setState({
+            openFollowersModal: false,
+            followers: []
+        })
+    }
     render = () => {
         if (!this.state.isLoading) {
             return (
@@ -212,7 +267,7 @@ class Profile extends React.Component {
                         {this.state.user && !!this.state.photos && this.renderGallery()}
                         <Modal
                             open={this.state.showLoginModal}
-                            onClose={() => this.setState({showLoginModal: false})}
+                            onClose={() => this.setState({ showLoginModal: false })}
                             basic
                             size='small'
                             centered
@@ -222,17 +277,67 @@ class Profile extends React.Component {
                                 <h3>This action requires you to be logged in.</h3>
                             </Modal.Content>
                             <Modal.Actions>
-                                <Button color='red' onClick={() => this.setState({showLoginModal: false})} inverted>
+                                <Button color='red' onClick={() => this.setState({ showLoginModal: false })} inverted>
                                     <Icon name='remove' /> Cancel
                                  </Button>
-                                 <Link to="/login">
+                                <Link to="/login">
                                     <Button color='green' inverted>
                                         <Icon name='checkmark' /> Login
-                                    </Button>                   
+                                    </Button>
                                 </Link>
                             </Modal.Actions>
                         </Modal>
                     </Container>
+                    <Modal size='tiny' open={this.state.openFollowingModal} onClose={this.onFollowingClose}>
+                        <Modal.Header>Following</Modal.Header>
+                        <Modal.Content>
+                            <Item.Group>
+                            {
+                                this.state.following && this.state.following.map((user) => {
+                                    return (
+                                        <Item key={user.id} onClick={() => { this.onFollowingClose(); this.props.history.push(`/users/${user.id}`); }} style={{cursor: 'pointer'}}>
+                                        <Item.Image size='tiny' src={user.photoUrl} />
+                                        <Item.Content verticalAlign='middle'>
+                                            <Item.Header>
+                                                {user.firstName} {user.lastName}
+                                            </Item.Header>
+                                        </Item.Content>
+                                        </Item>
+                                    )
+                                })
+                            }
+                            {this.state.following.length <= 0 && <h1>No following</h1>}
+                            </Item.Group>
+                        </Modal.Content>
+                        <Modal.Actions>
+                            <Button onClick={this.onFollowingClose} basic>Close</Button>
+                        </Modal.Actions>
+                    </Modal>
+                    <Modal size='tiny' open={this.state.openFollowersModal} onClose={this.onFollowersClose}>
+                        <Modal.Header>Followers</Modal.Header>
+                        <Modal.Content>
+                            <Item.Group>
+                            {
+                                this.state.followers && this.state.followers.map((user) => {
+                                    return (
+                                        <Item key={user.id} onClick={() => { this.onFollowersClose(); this.props.history.push(`/users/${user.id}`); }} style={{cursor: 'pointer'}}>
+                                        <Item.Image size='tiny' src={user.photoUrl} />
+                                        <Item.Content verticalAlign='middle'>
+                                            <Item.Header>
+                                                {user.firstName} {user.lastName}
+                                            </Item.Header>
+                                        </Item.Content>
+                                        </Item>
+                                    )
+                                })
+                            }
+                            {this.state.followers.length <= 0 && <h1>No followers</h1>}
+                            </Item.Group>
+                        </Modal.Content>
+                        <Modal.Actions>
+                            <Button onClick={this.onFollowersClose} basic>Close</Button>
+                        </Modal.Actions>
+                    </Modal>
                 </div>
             )
         } else {

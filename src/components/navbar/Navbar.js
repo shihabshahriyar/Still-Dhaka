@@ -18,7 +18,7 @@ class Navbar extends React.Component {
                 <Dropdown.Menu>
                     <Dropdown.Item><Link to={`/upload`}>Upload</Link></Dropdown.Item>
                     <Dropdown.Item><Link to={`/users/${this.props.auth.id}`}>Profile</Link></Dropdown.Item>
-                    <Dropdown.Item onClick={this.onLogout}><Link>Logout</Link></Dropdown.Item>
+                    <Dropdown.Item onClick={this.onLogout}>Logout</Dropdown.Item>
                 </Dropdown.Menu>
             </Dropdown>
     )
@@ -35,9 +35,7 @@ class Navbar extends React.Component {
             <Menu.Item><Link to="/">Still Dhaka</Link></Menu.Item>
 
             <Menu.Menu position='right'>
-                <Menu.Item
-                    name='Explore'
-                />
+            <Menu.Item><Link to="/">Explore</Link></Menu.Item>
                 {!this.props.auth.id  && this.renderUnauthenticatedDropdowns()}
                 {!!this.props.auth.id && this.renderAuthenticatedDropdowns()}
             </Menu.Menu>
