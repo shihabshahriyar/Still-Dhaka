@@ -38,7 +38,7 @@ class Navbar extends React.Component {
                 <Menu.Item
                     name='Explore'
                 />
-                {!this.props.auth.id && this.renderUnauthenticatedDropdowns()}
+                {!this.props.auth.id  && this.renderUnauthenticatedDropdowns()}
                 {!!this.props.auth.id && this.renderAuthenticatedDropdowns()}
             </Menu.Menu>
         </Menu>

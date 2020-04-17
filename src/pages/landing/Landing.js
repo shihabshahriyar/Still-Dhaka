@@ -1,12 +1,12 @@
 import React from 'react';
-import { Input, Header, Container, Button } from 'semantic-ui-react';
+import { Input, Icon, Container, Menu } from 'semantic-ui-react';
 import Masonry from 'react-masonry-css';
 import Photo from '../../components/photo/Photo';
 import { db } from '../../config/firebaseConfig';
 import { connect } from 'react-redux';
 import { BeatLoader } from 'react-spinners';
 import {
-  isMobile
+    isMobile
 } from "react-device-detect";
 
 class Landing extends React.Component {
@@ -15,10 +15,14 @@ class Landing extends React.Component {
         limit: 6,
         lastVisible: null,
         isScrollExecuted: false,
-        maxReached: false
+        maxReached: false,
+        searchTerm: ''
+    }
+    onSearch = () => {
+        this.props.history.push(`/photos/${this.state.searchTerm}`)
     }
     isBottom(el) {
-        return el.getBoundingClientRect().bottom <= window.innerHeight;
+        return el.getBoundingClientRect().bottom <= window.innerHeight + 0.5;
     }
     retrieveData = async () => {
         try {
@@ -71,22 +75,24 @@ class Landing extends React.Component {
         let imageContainer = document.getElementById('imageContainer');
         document.onscroll = () => {
             // Inside the "if" statement the "isExecuted" variable is negated to allow initial code execution.
-            if (this.isBottom(imageContainer) && !this.state.isScrollExecuted) {
-                // Set "isExecuted" to "true" to prevent further execution
-                this.setState({ isScrollExecuted: true });
+            if (!this.state.maxReached) {
+                if (this.isBottom(imageContainer) && !this.state.isScrollExecuted) {
+                    // Set "isExecuted" to "true" to prevent further execution
+                    this.setState({ isScrollExecuted: true });
+                    console.log('its working');
+                    // Your code goes here
+                    try {
+                        this.retrieveMore();
+                    }
+                    catch (error) {
+                        console.log('Maximum reached');
+                    }
 
-                // Your code goes here
-                try {
-                    this.retrieveMore();
+                    // After 1 second the "isExecuted" will be set to "false" to allow the code inside the "if" statement to be executed again
+                    setTimeout(() => {
+                        this.setState({ isScrollExecuted: false });
+                    }, 1000);
                 }
-                catch (error) {
-                    console.log('Maximum reached');
-                }
-
-                // After 1 second the "isExecuted" will be set to "false" to allow the code inside the "if" statement to be executed again
-                setTimeout(() => {
-                    this.setState({ isScrollExecuted: false });
-                }, 1000);
             }
         }
         try {
@@ -124,10 +130,32 @@ class Landing extends React.Component {
                         <h1 className="hero-text-header">Wherever you are, its Still Dhaka.</h1>
                     </div>
                     <div className="hero-input">
-                        <Input icon='search' placeholder='Search for the best talent and photos in Dhaka.' fluid style={{ borderRadius: '0 !important' }} />
+                        <Input icon value={this.setState.searchTerm} onChange={(e) => this.setState({ searchTerm: e.target.value })} placeholder='Search for the best talent and photos in Dhaka.' fluid style={{ borderRadius: '0 !important' }}>
+                            <input />
+                            <Icon name='search' link circular onClick={this.onSearch} />
+                        </Input>
                     </div>
                 </div>
             </section>
+            <Menu secondary>
+                <Menu.Item
+                    name='home'
+                />
+                <Menu.Item
+                    name='messages'
+                />
+                <Menu.Item
+                    name='friends'
+                />
+                <Menu.Menu position='right'>
+                    <Menu.Item>
+                        <Input icon='search' placeholder='Search...' />
+                    </Menu.Item>
+                    <Menu.Item
+                        name='logout'
+                    />
+                </Menu.Menu>
+            </Menu>
             <section>
                 <Container>
                     <Masonry

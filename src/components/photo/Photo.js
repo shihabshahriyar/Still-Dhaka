@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Button, Image, Icon, Modal, Header, Grid, Label } from 'semantic-ui-react';
+import { Container, Button, Image, Icon, Modal, Header, Grid, Label, ModalContent } from 'semantic-ui-react';
 import { db } from '../../config/firebaseConfig';
 import FollowButton from '../buttons/FollowButton';
 import LikeButton from '../buttons/LikeButton';
@@ -13,6 +13,24 @@ class Photo extends React.Component {
         isPhotoViewed: false,
         user: null,
         showLoginModal: false
+    }
+    renderEditButton = () => {
+        if (this.props.photo.createdBy == this.props.auth.id) {
+            return (
+                <Modal.Actions>
+                    <Link to={{
+                        pathname: '/photos/edit',
+                        state: {
+                            photo: this.props.photo
+                        }
+                    }}>
+                        <Button secondary>
+                            Edit photo <Icon name='right chevron' />
+                        </Button>
+                    </Link>
+                </Modal.Actions>
+            )
+        }
     }
     componentDidMount = () => {
         const { photo } = this.props;
@@ -102,7 +120,7 @@ class Photo extends React.Component {
                         <Grid.Row columns={2}>
                             <Grid.Column floated='left'>
                                 {this.state.user && <Link to={`/users/${this.state.user.id}`}><Image src={this.state.user.photoUrl} avatar />
-                                <span style={{ marginRight: 5 }}>{this.state.user.firstName} {this.state.user.lastName}</span></Link> }
+                                    <span style={{ marginRight: 5 }}>{this.state.user.firstName} {this.state.user.lastName}</span></Link>}
                                 {this.state.user && this.renderFollowButton(this.state.user)}
                             </Grid.Column>
                             <Grid.Column floated='right' style={{ textAlign: 'right' }}>
@@ -112,17 +130,20 @@ class Photo extends React.Component {
                         </Grid.Row>
                     </Grid>
                 </Modal.Header>
-                <section className="view-image-modal">
-                    <Container>
-                        <Image src={this.props.photo && this.props.photo.url} fluid />
-                        <div className="view-image-modal-content">
-                            <Header>{this.props.photo && this.props.photo.title}</Header>
-                            <p>
-                                {this.props.photo && this.props.photo.description}
-                            </p>
-                        </div>
-                    </Container>
-                </section>
+                <ModalContent>
+                    <section className="view-image-modal">
+                        <Container>
+                            <Image src={this.props.photo && this.props.photo.url} fluid />
+                            <div className="view-image-modal-content">
+                                <Header>{this.props.photo && this.props.photo.title}</Header>
+                                <p>
+                                    {this.props.photo && this.props.photo.description}
+                                </p>
+                            </div>
+                        </Container>
+                    </section>
+                </ModalContent>
+                {this.renderEditButton()}
             </Modal>
             <Modal
                 open={this.state.showLoginModal}
@@ -142,7 +163,7 @@ class Photo extends React.Component {
                     <Link to="/login">
                         <Button color='green' inverted>
                             <Icon name='checkmark' /> Login
-                        </Button>                   
+                        </Button>
                     </Link>
                 </Modal.Actions>
             </Modal>

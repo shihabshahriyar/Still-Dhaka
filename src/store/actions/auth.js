@@ -1,6 +1,16 @@
 import { auth, db, storage } from '../../config/firebaseConfig';
 import firebase from 'firebase';
 
+const createKeywords = (name) => {
+    const arrName = [];
+    let curName = '';
+    name.toLowerCase().split('').forEach(letter => {
+        curName += letter;
+        arrName.push(curName);
+    });
+    return arrName;
+}
+
 export const loginUser = (payload) => ({
     type: 'LOGIN_USER',
     payload
@@ -189,12 +199,30 @@ export const startUnfollowUser = (userId) => {
     }
 }
 
+export const startEditPhoto = (photoDetails) => {
+    return (dispatch) => {
+        return new Promise((resolve, reject) => {
+            let { title, description, tags, location } = photoDetails;
+            db.collection('photos').doc(photoDetails.id).update({
+                ...photoDetails,
+                keywords: [...createKeywords(title), ...createKeywords(description), ...tags, ...createKeywords(location)]
+            })
+                .then(() => {
+                    resolve();
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        });
+    }
+}
+
 //Can only upload photo if user is authenticated
 export const startUploadPhoto = (photoDetails) => {
     return (dispatch, getState) => {
         return new Promise((resolve, reject) => {
             const { title, description, tags, photo, location } = photoDetails;
-            db.collection('photos').add({ title, description, tags, location, createdBy: getState().auth.id, downloads: 0, likes: [] })
+            db.collection('photos').add({ title, description, tags, location, createdBy: getState().auth.id, downloads: 0, likes: [], keywords: [...createKeywords(title), ...createKeywords(description), ...tags, ...createKeywords(location)] })
                 .then((doc) => {
                     const photoId = doc.id;
                     db.collection('users').doc(getState().auth.id).update({
@@ -286,7 +314,8 @@ export const startRegisterUser = (credentials) => {
                     following: [],
                     comments: [],
                     likes: [],
-                    bio: `Download free, beautiful high-quality photos curated by ${firstName} ${lastName}`
+                    bio: `Download free, beautiful high-quality photos curated by ${firstName} ${lastName}`,
+                    keywords: [...createKeywords(firstName), ...createKeywords(lastName), ...createKeywords(username)]
                 }
                 db.collection('users').where('username', '==', newUser.username).get()
                     .then((snapshot) => {
@@ -314,7 +343,7 @@ export const startRegisterUser = (credentials) => {
                                 })
                                 .catch((error) => {
                                     reject(error);
-                            })
+                                })
                         }
                     })
             } else {
@@ -369,7 +398,7 @@ export const startUpdateUser = (updates) => {
         return new Promise((resolve, reject) => {
             if (photo == null) {
                 db.collection('users').doc(getState().auth.id).update({
-                    firstName, lastName, gender, bio
+                    firstName, lastName, gender, bio, keywords: [...createKeywords(firstName), ...createKeywords(lastName), ...createKeywords(getState().auth.user.username)]
                 })
                     .then(() => {
                         dispatch(updateUser({

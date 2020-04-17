@@ -1,6 +1,6 @@
 import React from 'react';
 import { Router, Route, Switch } from 'react-router-dom';
-import createHistory from 'history/createBrowserHistory';
+import { createBrowserHistory } from 'history';
 
 import Login from './pages/login/Login';
 import Register from './pages/register/Register';
@@ -12,8 +12,10 @@ import ReverseProtectedRoute from './components/reverse-protected-route/ReverseP
 import Profile from './pages/profile/Profile';
 import ProfileSettings from './pages/profile/ProfileSettings';
 import Upload from './pages/upload/Upload';
+import EditPhoto from './pages/edit-photo/EditPhoto';
+import PhotoSearch from './pages/search/PhotoSearch';
 
-export const history = createHistory();
+export const history = createBrowserHistory();
 
 class App extends React.Component {
   render = () => (
@@ -22,10 +24,12 @@ class App extends React.Component {
       <Switch>
         <Route path="/" component={Landing} exact/>
         <Route path="/users/:id" component={Profile} />
+        <ProtectedRoute path="/photos/edit" component={EditPhoto} />
         <ProtectedRoute path="/profile/settings" component={ProfileSettings} />
         <ProtectedRoute path="/upload" component={Upload} />
         <ReverseProtectedRoute path="/login" component={Login} />
         <ReverseProtectedRoute path="/register" component={Register}/>
+        <Route path="/photos/:searchTerm" component={PhotoSearch} />
         <Route path="*" component={() => <h1>Not found</h1>}/>
       </Switch>
     </Router>
