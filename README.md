@@ -2,7 +2,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Available Scripts
 
-##Initial firebase database
+## Initial firebase database
 Create a project in firebase and copy-paste your firebase configuration in the /config/firebaseConfig.js folder to make the app work.
 
 In the project directory, you can run:
