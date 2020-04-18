@@ -60,7 +60,6 @@ class Following extends React.Component {
             if (!this.state.maxReached) {
                 if (this.isBottom(imageContainer) && !this.state.isScrollExecuted) {
                     this.setState({ isScrollExecuted: true });
-                    console.log('its working');
                     if(this.state.photos.length > 0) {
                     this.retrieveMore()
                         .then((documentSnapshot) => {
@@ -122,7 +121,6 @@ class Following extends React.Component {
                     });
                 })
                 .catch((error) => {
-                    console.log(error);
                 });
             }
         }

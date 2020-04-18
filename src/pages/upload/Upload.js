@@ -236,12 +236,12 @@ class Upload extends React.Component {
                         </Modal.Description>
                     </Modal.Content>
                     <Modal.Actions>
-                        <Button onClick={this.onCropCancel} negative>
+                        <Button onClick={this.onCropCancel} basic>
                             Cancel
                     </Button>
                         <Button
                             onClick={this.onCrop}
-                            positive
+                            secondary
                         >Crop</Button>
                     </Modal.Actions>
                 </Modal>

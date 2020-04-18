@@ -39,7 +39,6 @@ class Profile extends React.Component {
                     this.setState({ user, isAuthenticatedUser: true, id, photos, isLoading: false });
                 })
                 .catch((error) => {
-                    console.log(error)
                     this.setState({ isLoading: false });
                 });
         } else {
@@ -57,17 +56,14 @@ class Profile extends React.Component {
                                 this.setState({ user, isAuthenticatedUser: false, id, photos, isLoading: false });
                             })
                             .catch((error) => {
-                                console.log(error)
                                 this.setState({ isLoading: false });
                             });
                     } else {
-                        console.log('No user');
                         this.setState({ isLoading: false });
                         this.props.history.push('/404');
                     }
                 })
                 .catch((error) => {
-                    console.log('No user');
                     this.setState({ isLoading: false });
                     this.props.history.push('/404');
                 });
@@ -94,7 +90,6 @@ class Profile extends React.Component {
                         this.setState({ user, isAuthenticatedUser: true, id, photos, isLoading: false });
                     })
                     .catch((error) => {
-                        console.log(error)
                         this.setState({ isLoading: false });
                     });
             } else {
@@ -112,16 +107,13 @@ class Profile extends React.Component {
                                     this.setState({ user, isAuthenticatedUser: false, id, photos, isLoading: false });
                                 })
                                 .catch((error) => {
-                                    console.log(error)
                                 });
                         } else {
-                            console.log('No user');
                             this.setState({ isLoading: false });
                             this.props.history.push('/404');
                         }
                     })
                     .catch((error) => {
-                        console.log('No user');
                         this.setState({ isLoading: false });
                         this.props.history.push('/404');
                     });
@@ -170,7 +162,6 @@ class Profile extends React.Component {
                 .orderBy('id')
                 .get()
                 .then((snapshot) => {
-                    console.log(snapshot);
                     let following = snapshot.docs.map((doc) => doc.data());
                     this.setState({
                         openFollowingModal: true,
@@ -193,7 +184,7 @@ class Profile extends React.Component {
                         </div>
 
                         <div className="profile-user-settings">
-                            <h1 className="profile-user-name text">{this.state.user.username}</h1>
+                            <h1 className="profile-user-name text">{this.state.user.username} {this.state.user.isVerified == true && <Icon name="check" size="small"></Icon>}</h1>
                             {this.state.isAuthenticatedUser && <Link to="/profile/settings" className="profile-edit-btn"><Button basic icon><Icon name='settings' /> Edit Profile</Button></Link>}
                             <span className="profile-edit-btn">{this.state.user && this.renderFollowButton(this.state.user)}</span>
                         </div>
@@ -203,7 +194,7 @@ class Profile extends React.Component {
                                 <li><span className="profile-stat-count">{this.state.user.photos.length}</span> posts</li>
                                 <li onClick={this.onFollowersOpen}><span className="profile-stat-count">{this.state.user.followers.length}</span> followers</li>
                                 <li onClick={this.onFollowingOpen}><span className="profile-stat-count">{this.state.user.following.length}</span> following</li>
-                            </div>
+                        </div>
                         </div>
 
                         <div className="profile-bio">
@@ -268,8 +259,7 @@ class Profile extends React.Component {
                         <Modal
                             open={this.state.showLoginModal}
                             onClose={() => this.setState({ showLoginModal: false })}
-                            basic
-                            size='small'
+                            size='tiny'
                             centered
                         >
                             <Header icon='browser' content='Hello there' />
@@ -277,11 +267,11 @@ class Profile extends React.Component {
                                 <h3>This action requires you to be logged in.</h3>
                             </Modal.Content>
                             <Modal.Actions>
-                                <Button color='red' onClick={() => this.setState({ showLoginModal: false })} inverted>
+                                <Button basic onClick={() => this.setState({ showLoginModal: false })}>
                                     <Icon name='remove' /> Cancel
                                  </Button>
                                 <Link to="/login">
-                                    <Button color='green' inverted>
+                                    <Button secondary>
                                         <Icon name='checkmark' /> Login
                                     </Button>
                                 </Link>
@@ -299,7 +289,7 @@ class Profile extends React.Component {
                                         <Item.Image size='tiny' src={user.photoUrl} />
                                         <Item.Content verticalAlign='middle'>
                                             <Item.Header>
-                                                {user.firstName} {user.lastName}
+                                                {user.username}
                                             </Item.Header>
                                         </Item.Content>
                                         </Item>
@@ -324,7 +314,7 @@ class Profile extends React.Component {
                                         <Item.Image size='tiny' src={user.photoUrl} />
                                         <Item.Content verticalAlign='middle'>
                                             <Item.Header>
-                                                {user.firstName} {user.lastName}
+                                                {user.username}
                                             </Item.Header>
                                         </Item.Content>
                                         </Item>

@@ -42,7 +42,6 @@ class Explore extends React.Component {
             }
         }
         catch (error) {
-            console.log(error);
         }
     };
     retrieveMore = async () => {
@@ -66,7 +65,6 @@ class Explore extends React.Component {
             }
         }
         catch (error) {
-            console.log(error);
         }
     };
     componentDidMount = () => {
@@ -77,7 +75,6 @@ class Explore extends React.Component {
                 if (this.isBottom(imageContainer) && !this.state.isScrollExecuted) {
                     // Set "isExecuted" to "true" to prevent further execution
                     this.setState({ isScrollExecuted: true });
-                    console.log('its working');
                     // Your code goes here
                     try {
                         if(this.state.photos.length > 0) {
@@ -85,7 +82,6 @@ class Explore extends React.Component {
                         }
                     }
                     catch (error) {
-                        console.log('Maximum reached');
                     }
 
                     // After 1 second the "isExecuted" will be set to "false" to allow the code inside the "if" statement to be executed again
@@ -100,7 +96,6 @@ class Explore extends React.Component {
             this.retrieveData();
         }
         catch (error) {
-            console.log(error);
         }
 
     }
@@ -119,7 +114,6 @@ class Explore extends React.Component {
                     });
                 })
                 .catch((error) => {
-                    console.log(error);
                 });
         }
     }

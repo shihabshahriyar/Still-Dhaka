@@ -20,6 +20,7 @@ class Photo extends React.Component {
         if (this.props.photo.createdBy == this.props.auth.id) {
             return (
                 <Modal.Actions>
+                    <Button basic onClick={() => this.setState({ isPhotoViewed: false })}>Close</Button>
                     <Button secondary onClick={() => history.push({
                         pathname: '/photos/edit',
                         state: {
@@ -28,6 +29,12 @@ class Photo extends React.Component {
                     })}>
                         Edit photo <Icon name='right chevron' />
                     </Button>
+                </Modal.Actions>
+            )
+        } else {
+            return (
+                <Modal.Actions>
+                    <Button basic onClick={() => this.setState({ isPhotoViewed: false })}>Close</Button>
                 </Modal.Actions>
             )
         }
@@ -121,12 +128,12 @@ class Photo extends React.Component {
                             <Grid.Row columns={2}>
                                 <Grid.Column floated='left'>
                                     {this.state.user && <Link to={`/users/${this.state.user.id}`}><Image src={this.state.user.photoUrl} avatar />
-                                        <span style={{ marginRight: 5 }}>{this.state.user.firstName} {this.state.user.lastName}</span></Link>}
+                                        <span style={{ marginRight: 5 }}>{this.state.user.username}</span></Link>}
                                     {this.state.user && this.renderFollowButton(this.state.user)}
                                 </Grid.Column>
                                 <Grid.Column floated='right' style={{ textAlign: 'right' }}>
                                     {this.renderLikeButton(this.props.photo)}
-                                    <DownloadButton photo={this.props.photo} />
+                                    {/* <DownloadButton photo={this.props.photo} /> */}
                                 </Grid.Column>
                             </Grid.Row>
                         </Grid>
@@ -142,10 +149,6 @@ class Photo extends React.Component {
                             <div>
                                 {this.renderLikeButton(this.props.photo)}
                             </div>
-                            <br />
-                            {/* <div>
-                                <DownloadButton photo={this.props.photo} />
-                            </div> */}
                         </div>
                     </MobileView>
                 </Modal.Header>

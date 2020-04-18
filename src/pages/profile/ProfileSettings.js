@@ -47,7 +47,6 @@ class ProfileSettings extends React.Component {
     onPhotoChange = (e) => {
         const reader = new FileReader();
         const photo = e.target.files[0];
-        console.log(photo);
         reader.readAsDataURL(photo);
         reader.onload = () => {
             this.setState({ photoUrl: reader.result, showCropModal: true });
@@ -147,9 +146,6 @@ class ProfileSettings extends React.Component {
             croppedImageUrl: ''
         });
     }
-    onRegisterSubmit = () => {
-        console.log(this.state);
-    }
     onUpdateProfile = () => {
         this.setState({ isUpdating: true });
         this.props.startUpdateUser({
@@ -233,12 +229,12 @@ class ProfileSettings extends React.Component {
                     </Modal.Description>
                 </Modal.Content>
                 <Modal.Actions>
-                    <Button onClick={this.onCropCancel} negative>
+                    <Button onClick={this.onCropCancel} basic>
                         Cancel
                     </Button>
                     <Button
                         onClick={this.onCrop}
-                        positive
+                        secondary
                     >Crop</Button>
                 </Modal.Actions>
             </Modal>

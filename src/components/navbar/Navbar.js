@@ -16,17 +16,17 @@ class Navbar extends React.Component {
     renderAuthenticatedDropdowns = () => (
             <Dropdown item text={<Image src={this.props.auth.user.photoUrl} style={{ marginRight: 0 }} avatar></Image>}>
                 <Dropdown.Menu>
-                    <Dropdown.Item><Link to={`/upload`}>Upload</Link></Dropdown.Item>
-                    <Dropdown.Item><Link to={`/users/${this.props.auth.id}`}>Profile</Link></Dropdown.Item>
-                    <Dropdown.Item onClick={this.onLogout}>Logout</Dropdown.Item>
+                <Link to={`/upload`}><Dropdown.Item>Upload</Dropdown.Item></Link>
+                <Link to={`/users/${this.props.auth.id}`}><Dropdown.Item>Profile</Dropdown.Item></Link>
+                <Dropdown.Item onClick={this.onLogout}>Logout</Dropdown.Item>
                 </Dropdown.Menu>
             </Dropdown>
     )
     renderUnauthenticatedDropdowns = () => (
             <Dropdown item text="Join">
                 <Dropdown.Menu>
-                    <Dropdown.Item><Link to={`/login`}>Login</Link></Dropdown.Item>
-                    <Dropdown.Item><Link to={'/register'}>Register</Link></Dropdown.Item>
+                <Link to={`/login`}><Dropdown.Item>Login</Dropdown.Item></Link>
+                <Link to={'/register'}><Dropdown.Item>Register</Dropdown.Item></Link>
                 </Dropdown.Menu>
             </Dropdown>
     )

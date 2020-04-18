@@ -40,6 +40,35 @@ export const uploadPhoto = (payload) => ({
     payload
 });
 
+export const startDeletePhoto = (id) => {
+    return (dispatch, getState) => {
+        return new Promise((resolve, reject) => {
+            let authUserId = getState().auth.id;
+            db.collection('photos').doc(id).delete()
+            .then(() => {
+                db.collection('users').doc(authUserId).update({
+                    photos: firebase.firestore.FieldValue.arrayRemove(id)
+                })
+                .then(() => {
+                    dispatch(updateUser({
+                        user: {
+                            ...getState().auth.user,
+                            photos: getState().auth.user.photos.filter((photoId) => photoId != id)
+                        }
+                    }));
+                    resolve();
+                })
+                .catch((error) => {
+                    reject(error);
+                })
+            })
+            .catch((error) => {
+                reject(error);
+            })
+        });
+    }
+}
+
 export const startUnlikePhoto = (photoId) => {
     return (dispatch, getState) => {
         return new Promise((resolve, reject) => {
@@ -314,6 +343,7 @@ export const startRegisterUser = (credentials) => {
                     following: [],
                     comments: [],
                     likes: [],
+                    isVerified: false,
                     bio: `Download free, beautiful high-quality photos curated by ${firstName} ${lastName}`,
                     keywords: [...createKeywords(firstName), ...createKeywords(lastName), ...createKeywords(username)]
                 }

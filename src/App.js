@@ -19,7 +19,7 @@ export const history = createBrowserHistory();
 
 class App extends React.Component {
   render = () => (
-    <Router history={history}>
+    <Router history={history} >
       <Navbar/>
       <Switch>
         <Route path="/users/:id" component={Profile} />
